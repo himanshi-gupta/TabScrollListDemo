@@ -3,6 +3,7 @@ package com.example.day5.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -37,6 +38,12 @@ class MainAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is NormalViewHolder) {
             holder.bind(items[position].title)
+            val btn = holder.itemView.findViewById<ImageButton>(R.id.likeButton)
+            btn.setOnClickListener {
+                items[position].isLiked = !items[position].isLiked
+                val liked = items[position].isLiked
+                btn.setImageResource(if (liked) R.drawable.filled_heart else R.drawable.outlined_heart)
+            }
         } else if (holder is HorizontalViewHolder) {
             holder.bind(items[position].horizontalItems)
         }
@@ -45,9 +52,9 @@ class MainAdapter(
     override fun getItemCount() = items.size
 
     class NormalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val tvTitle = itemView.findViewById<TextView>(R.id.months)
+        private val monthView = itemView.findViewById<TextView>(R.id.months)
         fun bind(text: String) {
-            tvTitle.text = text
+            monthView.text = text
         }
     }
 

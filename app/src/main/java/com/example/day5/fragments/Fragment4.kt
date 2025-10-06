@@ -2,6 +2,7 @@ package com.example.day5.fragments
 
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageButton
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,11 +18,11 @@ class Fragment4 : Fragment(R.layout.frag4) {
 
         // Sample data
         val data = listOf(
-            Item(false, "January"),
-            Item(false, "February"),
-            Item(false, "March"),
-            Item(false, "April"),
-            Item(false, "May"),
+            Item(false, title = "January"),
+            Item(false, title = "February"),
+            Item(false, title = "March"),
+            Item(false, title = "April"),
+            Item(false, title = "May"),
             Item(
                 true,
                 horizontalItems = listOf(
@@ -32,17 +33,16 @@ class Fragment4 : Fragment(R.layout.frag4) {
                     R.drawable.img5
                 )
             ),
-            Item(false, "June"),
-            Item(false, "July"),
-            Item(false, "August"),
-            Item(false, "September"),
-            Item(false, "October"),
-            Item(false, "November"),
-            Item(false, "December")
+            Item(false, title = "June"),
+            Item(false, title = "July"),
+            Item(false, title = "August"),
+            Item(false, title = "September"),
+            Item(false, title = "October"),
+            Item(false, title = "November"),
+            Item(false, title = "December")
         )
 
         recyclerView.layoutManager = LinearLayoutManager(this.context, LinearLayoutManager.VERTICAL, false)
         recyclerView.adapter = MainAdapter(data)
-
     }
 }
