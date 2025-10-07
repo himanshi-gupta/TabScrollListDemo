@@ -27,9 +27,9 @@ class MainAdapter(
         return if (viewType == TYPE_NORMAL) {
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_vertical, parent, false)
-            NormalViewHolder(view){
-                position -> notifyItemChanged(position)
-            }
+            NormalViewHolder(view, { position ->
+                notifyItemChanged(position)
+            }, { position -> removeItem(position) })
         } else {
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.horizontal_view, parent, false)
@@ -53,12 +53,26 @@ class MainAdapter(
         notifyItemRangeInserted(startPos, newItems.size)
     }
 
-    class NormalViewHolder(itemView: View, val onItemLiked: (Int) -> Unit) : RecyclerView.ViewHolder(itemView) {
+    fun removeItem(position: Int) {
+        if (position in items.indices) {
+            items.removeAt(position)
+            notifyItemRemoved(position)
+            notifyItemRangeChanged(position, items.size - position) // Optional: update positions
+        }
+    }
+
+
+    class NormalViewHolder(
+        itemView: View,
+        val onItemLiked: (Int) -> Unit,
+        val removeItem: (Int) -> Unit
+    ) : RecyclerView.ViewHolder(itemView) {
         private val monthView = itemView.findViewById<TextView>(R.id.months)
         private val likeButton = itemView.findViewById<ImageButton>(R.id.likeButton)
+        private val deleteButton = itemView.findViewById<ImageButton>(R.id.deleteButton)
         fun bind(item: Item) {
             monthView.text = item.title
-            likeButton.setImageResource(if(item.isLiked) R.drawable.filled_heart else R.drawable.outlined_heart)
+            likeButton.setImageResource(if (item.isLiked) R.drawable.filled_heart else R.drawable.outlined_heart)
 
             likeButton.setOnClickListener {
                 item.isLiked = !item.isLiked
@@ -66,11 +80,20 @@ class MainAdapter(
                     onItemLiked(it)
                 }
             }
+
+            deleteButton.setOnClickListener {
+                bindingAdapterPosition.takeIf { it != RecyclerView.NO_POSITION }?.let { pos ->
+                    removeItem(pos)
+                }
+            }
+
         }
     }
 
     class HorizontalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val horizontalRecycler = itemView.findViewById<RecyclerView>(R.id.horizontalRecycler)
+        private val horizontalRecycler =
+            itemView.findViewById<RecyclerView>(R.id.horizontalRecycler)
+
         fun bind(data: List<Int>) {
             horizontalRecycler.layoutManager =
                 LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
