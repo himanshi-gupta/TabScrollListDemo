@@ -3,6 +3,7 @@ package com.example.day5.fragments
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
+import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +16,7 @@ import com.example.day5.pagination.PagingDataSource
 class Fragment4 : Fragment(R.layout.frag4) {
     private lateinit var recyclerView : RecyclerView
     private lateinit var adapter: MainAdapter
+    private lateinit var progressBar: ProgressBar
     private val repository = PaginatedRepository(PagingDataSource())
     private var isLoading = false
 
@@ -22,6 +24,8 @@ class Fragment4 : Fragment(R.layout.frag4) {
         super.onViewCreated(view, savedInstanceState)
 
         recyclerView = view.findViewById<RecyclerView>(R.id.combinedRecyclerView)
+        progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
+
         // Sample data
         val data = mutableListOf(
             Item(false, title = "January"),
@@ -62,8 +66,12 @@ class Fragment4 : Fragment(R.layout.frag4) {
 
     private fun loadNextPage(){
         isLoading = true
-        val newItems = repository.loadNextPage()
-        adapter.addItems(newItems)
-        isLoading = false
+        progressBar.visibility = View.VISIBLE
+        recyclerView.postDelayed({
+            val newItems = repository.loadNextPage()
+            adapter.addItems(newItems)
+            isLoading = false
+            progressBar.visibility = View.GONE
+        }, 1500)
     }
 }
