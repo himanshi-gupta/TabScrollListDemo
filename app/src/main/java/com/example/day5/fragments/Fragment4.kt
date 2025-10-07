@@ -9,15 +9,21 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.day5.models.Item
 import com.example.day5.adapters.MainAdapter
 import com.example.day5.R
+import com.example.day5.pagination.PaginatedRepository
+import com.example.day5.pagination.PagingDataSource
 
 class Fragment4 : Fragment(R.layout.frag4) {
+    private lateinit var recyclerView : RecyclerView
+    private lateinit var adapter: MainAdapter
+    private val repository = PaginatedRepository(PagingDataSource())
+    private var isLoading = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val recyclerView = view.findViewById<RecyclerView>(R.id.combinedRecyclerView)
-
+        recyclerView = view.findViewById<RecyclerView>(R.id.combinedRecyclerView)
         // Sample data
-        val data = listOf(
+        val data = mutableListOf(
             Item(false, title = "January"),
             Item(false, title = "February"),
             Item(false, title = "March"),
@@ -42,7 +48,22 @@ class Fragment4 : Fragment(R.layout.frag4) {
             Item(false, title = "December")
         )
 
+        adapter = MainAdapter(data)
         recyclerView.layoutManager = LinearLayoutManager(this.context, LinearLayoutManager.VERTICAL, false)
-        recyclerView.adapter = MainAdapter(data)
+        recyclerView.adapter = adapter
+
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener(){
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if(!recyclerView.canScrollVertically(1) && !isLoading)
+                    loadNextPage()
+            }
+        })
+    }
+
+    private fun loadNextPage(){
+        isLoading = true
+        val newItems = repository.loadNextPage()
+        adapter.addItems(newItems)
+        isLoading = false
     }
 }

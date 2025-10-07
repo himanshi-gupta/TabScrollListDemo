@@ -11,7 +11,7 @@ import com.example.day5.models.Item
 import com.example.day5.R
 
 class MainAdapter(
-    private val items: List<Item>
+    private val items: MutableList<Item>,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -27,7 +27,9 @@ class MainAdapter(
         return if (viewType == TYPE_NORMAL) {
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_vertical, parent, false)
-            NormalViewHolder(view)
+            NormalViewHolder(view){
+                position -> notifyItemChanged(position)
+            }
         } else {
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.horizontal_view, parent, false)
@@ -37,13 +39,7 @@ class MainAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is NormalViewHolder) {
-            holder.bind(items[position].title)
-            val btn = holder.itemView.findViewById<ImageButton>(R.id.likeButton)
-            btn.setOnClickListener {
-                items[position].isLiked = !items[position].isLiked
-                val liked = items[position].isLiked
-                btn.setImageResource(if (liked) R.drawable.filled_heart else R.drawable.outlined_heart)
-            }
+            holder.bind(items[position])
         } else if (holder is HorizontalViewHolder) {
             holder.bind(items[position].horizontalItems)
         }
@@ -51,10 +47,25 @@ class MainAdapter(
 
     override fun getItemCount() = items.size
 
-    class NormalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    fun addItems(newItems: List<Item>) {
+        val startPos = items.size
+        items.addAll(newItems)
+        notifyItemRangeInserted(startPos, newItems.size)
+    }
+
+    class NormalViewHolder(itemView: View, val onItemLiked: (Int) -> Unit) : RecyclerView.ViewHolder(itemView) {
         private val monthView = itemView.findViewById<TextView>(R.id.months)
-        fun bind(text: String) {
-            monthView.text = text
+        private val likeButton = itemView.findViewById<ImageButton>(R.id.likeButton)
+        fun bind(item: Item) {
+            monthView.text = item.title
+            likeButton.setImageResource(if(item.isLiked) R.drawable.filled_heart else R.drawable.outlined_heart)
+
+            likeButton.setOnClickListener {
+                item.isLiked = !item.isLiked
+                bindingAdapterPosition.takeIf { it != RecyclerView.NO_POSITION }?.let {
+                    onItemLiked(it)
+                }
+            }
         }
     }
 
